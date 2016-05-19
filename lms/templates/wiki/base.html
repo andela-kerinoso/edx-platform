@@ -47,6 +47,10 @@
 
 {% block nav_skip %}#wiki-content{% endblock %}
 
+{% block sidebar %}
+   {% include "sidebar.html" %}
+{% endblock %}
+
 {% block body %}
   {% if request.course %}
   {% with course=request.course %}
