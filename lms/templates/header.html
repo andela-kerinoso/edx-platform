@@ -1,15 +1,154 @@
 ## mako
 <%namespace name='static' file='static_content.html'/>
+<%namespace file='main.html' import="login_query, stanford_theme_enabled"/>
 <%!
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext as _
+
+# App that handles subdomain specific branding
+import branding
+# app that handles site status messages
+from status.status import get_site_status_msg
+
 from microsite_configuration import microsite
-%>
-<%
-theme_enabled = settings.FEATURES.get("USE_CUSTOM_THEME", False)
-is_microsite = microsite.is_request_in_microsite()
+from microsite_configuration.templatetags.microsite import platform_name
+from ccx.overrides import get_current_ccx
 %>
 
-% if theme_enabled and not is_microsite:
-  <%include file="theme-header.html" />
-% else:
-  <%include file="${microsite.get_template_path('navigation.html')}" />
+## Provide a hook for themes to inject branding on top.
+<%block name="navigation_top" />
+
+<%block>
+<%
+try:
+    course_id = course.id.to_deprecated_string()
+except:
+    # can't figure out a better way to get at a possibly-defined course var
+    course_id = None
+site_status_msg = get_site_status_msg(course_id)
+%>
+% if site_status_msg:
+<div class="site-status">
+  <div class="inner-wrapper">
+    <span class="white-error-icon"></span>
+    <p>${site_status_msg}</p>
+  </div>
+</div>
 % endif
+</%block>
+
+  <header id="global-navigation" class="global" >
+    <!-- This file is only for demonstration, and is horrendous! -->
+    <nav aria-label="${_('Global')}">
+    <div class="logo">
+      <a href="${marketing_link('ROOT')}">
+        <%block name="navigation_logo">
+            <img src="${static.url("images/logo.png")}" alt="Big Data University: Data Science Courses" title="Big Data University: Data Science Courses"/>
+        </%block>
+      </a>
+    </div>
+
+    % if user.is_authenticated():
+    <ol class="user">
+      <li class="primary">
+        <input type="text" placeholder="Explore new learning opportunities" class="ibm-search-bar home-search">
+      </li>
+      <li class="primary">
+        <a href="${reverse('dashboard')}" class="user-link">
+          <i class="icon fa fa-home" aria-hidden="true"></i>
+          <span class="sr">${_("Dashboard for:")}</span>
+          <div>
+          ${user.username}
+          </div>
+        </a>
+      </li>
+      <li class="primary">
+        <a href="#" class="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr">${_("More options dropdown")}</span><i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+        <ul class="dropdown-menu" aria-label="More Options" role="menu">
+          <%block name="navigation_dropdown_menu_links" >
+            <li><a href="${reverse('account_settings')}">${_("Account Settings")}</a></li>
+            <li><a href="${reverse('learner_profile', kwargs={'username': user.username})}">${_("My Profile")}</a></li>
+          </%block>
+          <li><a href="${reverse('logout')}" role="menuitem">${_("Sign Out")}</a></li>
+        </ul>
+      </li>
+      <script>
+        if (typeof heap !== 'undefined') {
+          heap.identify('${user.email}');
+          heap.addUserProperties({
+            'Name': '${user.profile.name}',
+            'City': '${user.profile.city}',
+            'Country': '${user.profile.country}',
+            'Gender': '${user.profile.gender}',
+            'Year of Birth': '${user.profile.year_of_birth}',
+            'Language': '${user.profile.language}',
+            'Education Completed': '${user.profile.level_of_education}'
+          });
+        }
+      </script>
+    </ol>
+    <a class="bdu-nav-icon" href="javascript:void(0);" onclick="myFunction()">☰</a>
+    <ol class="logged-in right nav-courseware topnav">
+        <li class="login-links">
+          <a class="ibm-login" href="${reverse('dashboard')}" class="user-link">
+            <i class="icon fa fa-home" aria-hidden="true"></i>
+            <span class="sr">${_("Dashboard for:")}</span>
+            <div>
+            ${user.username}
+            </div>
+          </a>
+          <a class="ibm-login" href="${reverse('account_settings')}">${_("Account Settings")}</a>
+          <a class="ibm-login" href="${reverse('learner_profile', kwargs={'username': user.username})}">${_("My Profile")}</a>
+          <a class="ibm-login" href="${reverse('logout')}" role="menuitem">${_("Sign Out")}</a>
+        </li>
+        <li class="side-bar-links">
+          <a class="ibm-login" href="${marketing_link('LEARNING_PATHS')}">${_("Learning Paths")}</a>
+          <a class="ibm-login" href="${marketing_link('COURSES')}">${_("Courses")}</a>
+          <a class="ibm-login" href="${marketing_link('BLOG')}">${_("Blog")}</a>
+          <a class="ibm-login" href="${marketing_link('PARTICIPATE')}">${_("Participate")}</a>
+          <a class="ibm-login" href="${marketing_link('ABOUT')}">${_("About")}</a>
+          <input type="text" placeholder="Explore new learning opportunities" class="ibm-search-bar navbar-search">
+        </li>
+    </ol>
+    % else:
+    <a class="bdu-nav-icon" href="javascript:void(0);" onclick="myFunction()">☰</a>
+    <ol class="right nav-courseware topnav">
+      <li>
+        <input type="text" placeholder="Explore new learning opportunities" class="ibm-search-bar home-search">
+      </li>
+        % if not settings.FEATURES['DISABLE_LOGIN_BUTTON']:
+          % if course and settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD') and course.enrollment_domain:
+          <li class="nav-courseware-01">
+            <a class="ibm-login" href="${reverse('course-specific-login', args=[course.id.to_deprecated_string()])}${login_query()}">${_("Login")}</a>
+            <a class="ibm-login" href="${reverse('course-specific-register', args=[course.id.to_deprecated_string()])}">${_("Sign Up")}</a>
+          </li>
+          % else:
+          <li class="login-links">
+            <a class="ibm-login" href="/login${login_query()}">${_("Login")}</a>
+            <a class="ibm-login" href="/register">${_("Sign Up")}</a>
+          </li>
+          % endif
+        % endif
+        <li class="side-bar-links">
+          <a class="ibm-login" href="${marketing_link('LEARNING_PATHS')}">${_("Learning Paths")}</a>
+          <a class="ibm-login" href="${marketing_link('COURSES')}">${_("Courses")}</a>
+          <a class="ibm-login" href="${marketing_link('BLOG')}">${_("Blog")}</a>
+          <a class="ibm-login" href="${marketing_link('PARTICIPATE')}">${_("Participate")}</a>
+          <a class="ibm-login" href="${marketing_link('ABOUT')}">${_("About")}</a>
+          <input type="text" placeholder="Explore new learning opportunities" class="ibm-search-bar navbar-search">
+        </li>
+    </ol>
+    % endif
+  </nav>
+</header>
+% if course:
+<!--[if lte IE 8]>
+<div class="ie-banner" aria-hidden="true">${_('<strong>Warning:</strong> Your browser is not fully supported. We strongly recommend using {chrome_link} or {ff_link}.').format(chrome_link='<a href="https://www.google.com/intl/en/chrome/browser/" target="_blank">Chrome</a>', ff_link='<a href="http://www.mozilla.org/en-US/firefox/new/" target="_blank">Firefox</a>')}</div>
+<![endif]-->
+% endif
+
+%if not user.is_authenticated():
+  <%include file="forgot_password_modal.html" />
+%endif
+
+<%include file="help_modal.html"/>
