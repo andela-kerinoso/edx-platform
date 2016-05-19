@@ -1,0 +1,24 @@
+## mako
+<%!
+from django.utils.translation import ugettext as _
+%>
+
+<div class="sidebar hidden-sm-down">
+  <ul class="nav">
+    <li class="nav-item">
+      <a href="${marketing_link('LEARNING_PATHS')}" class="nav-link">${_("Learning Paths")}</a>
+    </li>
+    <li class="nav-item">
+      <a href="${marketing_link('COURSES')}" class="nav-link">${_("Courses")}</a>
+    </li>
+    <li class="nav-item">
+      <a href="${marketing_link('BLOG')}" class="nav-link">${_("Blog")}</a>
+    </li>
+    <li class="nav-item">
+      <a href="${marketing_link('PARTICIPATE')}" class="nav-link">${_("Participate")}</a>
+    </li>
+    <li class="nav-item">
+    <a href="${marketing_link('ABOUT')}" class="nav-link">${_("About")}</a>
+    </li>
+  </ul>
+</div>
