@@ -51,6 +51,10 @@
    {% include "sidebar.html" %}
 {% endblock %}
 
+{% block bodyextra %}
+   {% include "body-extra.html" %}
+{% endblock %}
+
 {% block body %}
   {% if request.course %}
   {% with course=request.course %}
