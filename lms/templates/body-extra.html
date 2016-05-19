@@ -1,0 +1,25 @@
+<%! from microsite_configuration import microsite %>
+<script>
+  function myFunction() {
+      document.getElementsByClassName("topnav")[0].classList.toggle("responsive");
+  }
+</script>
+
+<!-- UserVoice JavaScript SDK (only needed once on a page) -->
+<script>(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/sjqLUQN6ti1Ez9rXdGDoEA.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})()</script>
+
+<!-- A tab to launch the Classic Widget -->
+<script>
+  UserVoice = window.UserVoice || [];
+  UserVoice.push(['showTab', 'classic_widget', {
+    mode: 'full',
+    primary_color: '#19496A',
+    link_color: '#007dbf',
+    default_mode: 'support',
+    forum_id: 317580,
+    tab_label: 'Support',
+    tab_color: '#19496A',
+    tab_position: 'middle-right',
+    tab_inverted: false
+  }]);
+</script>
