@@ -10,30 +10,6 @@
 </title>
 {% endblock %}
 
-{% block bodyextra %}
-  <script type="text/javascript">
-    $(function() {
-
-      // adding js class for styling with accessibility in mind
-      $('body').addClass('js');
-
-      // new window/tab opening
-      $('a[rel="external"], a[class="new-vp"]')
-      .click( function() {
-      window.open( $(this).attr('href') );
-      return false;
-      });
-
-      // form field label styling on focus
-      $("form :input").focus(function() {
-        $("label[for='" + this.id + "']").parent().addClass("is-focused");
-      }).blur(function() {
-        $("label").parent().removeClass("is-focused");
-      });
-    });
-  </script>
-{% endblock %}
-
 {% block bodyclass %}view-passwordreset{% endblock %}
 
 {% block body %}
